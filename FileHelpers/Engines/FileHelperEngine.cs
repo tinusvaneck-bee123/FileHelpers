@@ -258,7 +258,6 @@ namespace FileHelpers
 
                                 if (skip == false)
                                 {
-
                                     if (dt == null)
                                         result.Add(record);
                                     else

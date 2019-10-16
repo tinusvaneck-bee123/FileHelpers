@@ -255,6 +255,19 @@ namespace FileHelpers
 
         #endregion
 
+        #region "  FieldOrder  "
+        /// <summary>
+        /// Set field order on RecordInfo
+        /// </summary>
+        /// <param name="fields"></param>
+        public void SetFieldOrder(string[] fields)
+        {
+            RecordInfo.SetFieldOrder(fields);
+            Options.ResetFieldNames();
+            CreateRecordOptions();
+        }
+        #endregion
+
         /// <summary>Event handler called to notify progress.</summary>
         public event EventHandler<ProgressEventArgs> Progress;
 

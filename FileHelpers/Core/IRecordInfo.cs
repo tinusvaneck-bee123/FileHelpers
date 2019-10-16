@@ -97,6 +97,12 @@ namespace FileHelpers
         int GetFieldIndex(string fieldName);
 
         /// <summary>
+        /// Set field order using captions.
+        /// </summary>
+        /// <param name="fieldNames"></param>
+        void SetFieldOrder(string[] fieldNames);
+
+        /// <summary>
         /// /Get the complete information about this field
         /// </summary>
         /// <param name="name">FieldName to look up for information</param>

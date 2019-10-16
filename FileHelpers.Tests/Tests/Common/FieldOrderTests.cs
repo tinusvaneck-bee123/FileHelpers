@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using NFluent;
+using System.Collections.Generic;
 
 namespace FileHelpers.Tests.CommonTests
 {
@@ -363,5 +364,45 @@ namespace FileHelpers.Tests.CommonTests
             [FieldOrder(1)]
             public DateTime Field5;
         }
+
+        [Test]
+        public void ReOrderFields()
+        {
+            // arrange
+            var engine = new FileHelperEngine<FieldOrderType>();
+            List<string> newOrder = new List<string>() { "Field5", "Field4", "Field3"};
+            
+            // act
+            engine.SetFieldOrder(newOrder.ToArray());
+
+            // assert
+            Assert.AreEqual(5, engine.Options.FieldCount);
+            Assert.AreEqual("Field5", engine.Options.FieldsNames[0]);
+            Assert.AreEqual("Field4", engine.Options.FieldsNames[1]);
+            Assert.AreEqual("Field3", engine.Options.FieldsNames[2]);
+            Assert.AreEqual("Field1", engine.Options.FieldsNames[3]);
+            Assert.AreEqual("Field2", engine.Options.FieldsNames[4]);
+        }
+
+        [Test]
+        public void ReOrderDelimitedFields()
+        {
+            // arrange
+            var engine = new DelimitedFileEngine<FieldOrderType>();
+            List<string> newOrder = new List<string>() { "Field5", "Field4", "Field3"};
+
+            // act
+            //engine.SetFieldOrder(newOrder);
+            engine.SetFieldOrder(newOrder.ToArray());
+
+            // assert
+            Assert.AreEqual(5, engine.Options.FieldCount);
+            Assert.AreEqual("Field5", engine.Options.FieldsNames[0]);
+            Assert.AreEqual("Field4", engine.Options.FieldsNames[1]);
+            Assert.AreEqual("Field3", engine.Options.FieldsNames[2]);
+            Assert.AreEqual("Field1", engine.Options.FieldsNames[3]);
+            Assert.AreEqual("Field2", engine.Options.FieldsNames[4]);
+        }
+
     }
 }

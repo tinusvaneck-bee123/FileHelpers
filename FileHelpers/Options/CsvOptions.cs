@@ -12,7 +12,7 @@ namespace FileHelpers.Options
         /// <param name="delimiter">The delimiter for each field</param>
         /// <param name="numberOfFields">The number of fields of each record</param>
         public CsvOptions(string className, char delimiter, int numberOfFields)
-            : this(className, delimiter, numberOfFields, 1) {}
+            : this(className, delimiter, numberOfFields, 1) { }
 
         /// <summary>Create a CSV Wrapper using the specified number of fields.</summary>
         /// <param name="className">The name of the record class</param>
@@ -63,6 +63,7 @@ namespace FileHelpers.Options
         private Encoding mEncoding = Encoding.GetEncoding(0);
         private bool mIgnoreEmptyLines = false;
         private bool mIncludeHeaderNames;
+        private bool mUseHeaderColumnOrder;
 
         /// <summary>A sample file from where to read the field names and number.</summary>
         public string SampleFileName
@@ -161,6 +162,15 @@ namespace FileHelpers.Options
             set { mIgnoreEmptyLines = value; }
         }
 
+        /// <summary>
+        /// Use the field order from the import file. Overwrites FieldOrderAttributes.
+        /// </summary>
+        public bool UseHeaderColumnOrder
+        {
+            get { return mUseHeaderColumnOrder; }
+            set { mUseHeaderColumnOrder = value; }
+        }
+
         private ConvertHelpers.DecimalConverter mDecimalConv;
         private ConvertHelpers.DoubleConverter mDoubleConv;
         private ConvertHelpers.SingleConverter mSingleConv;
@@ -173,7 +183,8 @@ namespace FileHelpers.Options
         /// <returns>string representation of the string</returns>
         internal string ValueToString(object o)
         {
-            if (mDecimalConv == null) {
+            if (mDecimalConv == null)
+            {
                 mDecimalConv = new ConvertHelpers.DecimalConverter(DecimalSeparator);
                 mDoubleConv = new ConvertHelpers.DoubleConverter(DecimalSeparator);
                 mSingleConv = new ConvertHelpers.SingleConverter(DecimalSeparator);

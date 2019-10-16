@@ -79,4 +79,25 @@ namespace FileHelpers.Tests
     {
         public Guid? Field1;
     }
+
+    [IgnoreFirst] // For the header.
+    [DelimitedRecord(",")]
+    [IgnoreInheritedClass]
+    public class SampleType5Fields
+    {
+        [FieldCaption("Field1")]
+        public string Field1;
+        [FieldCaption("Field2")]
+        public string Field2;
+        [FieldCaption("Field3")]
+        public string Field3;
+        [FieldCaption("Field4")]
+        public string Field4;
+        [FieldCaption("Field5")]
+        public string Field5;
+
+        [FieldCaption("Extras")]
+        [FieldOptional]
+        public string[] Extras;
+    }
 }

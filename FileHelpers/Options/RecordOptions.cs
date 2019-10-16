@@ -89,6 +89,11 @@ namespace FileHelpers.Options
             }
         }
 
+        public void ResetFieldNames()
+        {
+            mFieldNames = null;
+        }
+
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private Type[] mFieldTypes;
 

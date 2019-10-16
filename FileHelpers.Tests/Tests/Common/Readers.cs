@@ -215,6 +215,65 @@ namespace FileHelpers.Tests.CommonTests
         }
 
         [Test]
+        public void ReadStreamWithDifferentColumnOrder()
+        {
+            // arrange
+            string data = "Field3,Field4,Field5,Field1,Field2" + Environment.NewLine +
+                          "3,4,5,1,2" + Environment.NewLine +
+                          "33,44,55,11,22" + Environment.NewLine ;
+            var engine = new DelimitedFileEngine<SampleType5Fields>();
+
+            // act
+            engine.SetFieldOrder(new string[] { "Field3", "Field4", "Field5", "Field1", "Field2" });
+            TextReader textReader = new StringReader(data);
+            SampleType5Fields[] res;
+            res = engine.ReadStream(textReader, int.MaxValue);
+
+            // assert
+            Assert.AreEqual(2, res.Length);
+            Assert.AreEqual(2, engine.TotalRecords);
+            Assert.AreEqual(0, engine.ErrorManager.ErrorCount);
+
+            Assert.AreEqual("1", res[0].Field1);
+            Assert.AreEqual("2", res[0].Field2);
+            Assert.AreEqual("3", res[0].Field3);
+            Assert.AreEqual("4", res[0].Field4);
+            Assert.AreEqual("5", res[0].Field5);
+
+            Assert.AreEqual("11", res[1].Field1);
+            Assert.AreEqual("22", res[1].Field2);
+            Assert.AreEqual("33", res[1].Field3);
+            Assert.AreEqual("44", res[1].Field4);
+            Assert.AreEqual("55", res[1].Field5);            
+        }
+
+        [Test]
+        public void ReadStreamWithExtraColumns()
+        {
+            // arrange
+            string data = "Field3,Field4,Field5,Field1,Field2,More1,More2" + Environment.NewLine +
+                          "3,4,5,1,2,a,b" + Environment.NewLine;
+            var engine = new DelimitedFileEngine<SampleType5Fields>();
+            
+            // act
+            engine.SetFieldOrder(new string[] { "Field3", "Field4", "Field5", "Field1", "Field2" });
+            TextReader textReader = new StringReader(data);
+            SampleType5Fields[] res;
+            res = engine.ReadStream(textReader, int.MaxValue);
+
+            // assert
+            Assert.AreEqual(1, res.Length);
+            Assert.AreEqual(1, engine.TotalRecords);
+            Assert.AreEqual(0, engine.ErrorManager.ErrorCount);
+
+            Assert.AreEqual("1", res[0].Field1);
+            Assert.AreEqual("2", res[0].Field2);
+            Assert.AreEqual("3", res[0].Field3);
+            Assert.AreEqual("4", res[0].Field4);
+            Assert.AreEqual("5", res[0].Field5);
+        }
+
+        [Test]
         public void ReadString()
         {
             string data = "11121314901234" + Environment.NewLine +

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -109,7 +110,7 @@ namespace FileHelpers
 
         #region "  Constructor "
 
-        private RecordInfo() {}
+        private RecordInfo() { }
 
         /// <summary>
         /// Read the attributes of the class and create an array
@@ -135,13 +136,15 @@ namespace FileHelpers
         {
             var recordAttribute = Attributes.GetFirstInherited<TypedRecordAttribute>(RecordType);
 
-            if (recordAttribute == null) {
+            if (recordAttribute == null)
+            {
                 throw new BadUsageException(Messages.Errors.ClassWithOutRecordAttribute
                     .ClassName(RecordType.Name)
                     .Text);
             }
 
-            if (ReflectionHelper.GetDefaultConstructor(RecordType) == null) {
+            if (ReflectionHelper.GetDefaultConstructor(RecordType) == null)
+            {
                 throw new BadUsageException(Messages.Errors.ClassWithOutDefaultConstructor
                     .ClassName(RecordType.Name)
                     .Text);
@@ -157,7 +160,8 @@ namespace FileHelpers
 
             Attributes.WorkWithFirst<IgnoreEmptyLinesAttribute>(
                 RecordType,
-                a => {
+                a =>
+                {
                     IgnoreEmptyLines = true;
                     IgnoreEmptySpaces = a.IgnoreSpaces;
                 });
@@ -166,7 +170,8 @@ namespace FileHelpers
             Attributes.WorkWithFirst<IgnoreCommentedLinesAttribute>(
 #pragma warning restore CS0618 // Type or member is obsolete
                 RecordType,
-                a => {
+                a =>
+                {
                     IgnoreEmptyLines = true;
                     CommentMarker = a.CommentMarker;
                     CommentAnyPlace = a.AnyPlace;
@@ -174,22 +179,24 @@ namespace FileHelpers
 
             Attributes.WorkWithFirst<ConditionalRecordAttribute>(
                 RecordType,
-                a => {
+                a =>
+                {
                     RecordCondition = a.Condition;
                     RecordConditionSelector = a.ConditionSelector;
 
                     if (RecordCondition == RecordCondition.ExcludeIfMatchRegex ||
-                        RecordCondition == RecordCondition.IncludeIfMatchRegex) {
+                        RecordCondition == RecordCondition.IncludeIfMatchRegex)
+                    {
                         RecordConditionRegEx = new Regex(RecordConditionSelector,
                             RegexOptions.Compiled | RegexOptions.IgnoreCase |
                             RegexOptions.ExplicitCapture);
                     }
                 });
 
-            if (CheckInterface(RecordType, typeof (INotifyRead)))
+            if (CheckInterface(RecordType, typeof(INotifyRead)))
                 NotifyRead = true;
 
-            if (CheckInterface(RecordType, typeof (INotifyWrite)))
+            if (CheckInterface(RecordType, typeof(INotifyWrite)))
                 NotifyWrite = true;
 
             // Create fields
@@ -198,17 +205,19 @@ namespace FileHelpers
 
             Fields = CreateCoreFields(fields, recordAttribute);
 
-            if (FieldCount == 0) {
+            if (FieldCount == 0)
+            {
                 throw new BadUsageException(Messages.Errors.ClassWithOutFields
                     .ClassName(RecordType.Name)
                     .Text);
             }
 
-            if (recordAttribute is FixedLengthRecordAttribute) {
+            if (recordAttribute is FixedLengthRecordAttribute)
+            {
                 // Defines the initial size of the StringBuilder
                 SizeHint = 0;
                 for (int i = 0; i < FieldCount; i++)
-                    SizeHint += ((FixedLengthField) Fields[i]).FieldLength;
+                    SizeHint += ((FixedLengthField)Fields[i]).FieldLength;
             }
         }
 
@@ -232,12 +241,13 @@ namespace FileHelpers
 
             // count of normal fields
             var genericFields = 0;
-            for (int i = 0; i < fields.Count; i++) {
+            for (int i = 0; i < fields.Count; i++)
+            {
                 FieldBase currentField = FieldBase.CreateField(fields[i], recordAttribute);
                 if (currentField == null)
                     continue;
 
-                if (currentField.FieldInfo.IsDefined(typeof (CompilerGeneratedAttribute), false))
+                if (currentField.FieldInfo.IsDefined(typeof(CompilerGeneratedAttribute), false))
                     automaticFields++;
                 else
                     genericFields++;
@@ -250,7 +260,8 @@ namespace FileHelpers
             }
 
             if (automaticFields > 0 &&
-                genericFields > 0 && SumOrder(resFields) == 0) {
+                genericFields > 0 && SumOrder(resFields) == 0)
+            {
                 throw new BadUsageException(Messages.Errors.MixOfStandardAndAutoPropertiesFields
                     .ClassName(resFields[0].FieldInfo.DeclaringType.Name)
                     .Text);
@@ -281,7 +292,8 @@ namespace FileHelpers
         /// <param name="resFields">List of fields to extract</param>
         private static void CheckForOptionalAndArrayProblems(List<FieldBase> resFields)
         {
-            for (int i = 0; i < resFields.Count; i++) {
+            for (int i = 0; i < resFields.Count; i++)
+            {
                 var currentField = resFields[i];
 
                 // Dont check the first field
@@ -295,21 +307,25 @@ namespace FileHelpers
                     &&
                     currentField.IsOptional == false
                     &&
-                    currentField.InNewLine == false) {
+                    currentField.InNewLine == false)
+                {
                     throw new BadUsageException(Messages.Errors.ExpectingFieldOptional
                         .FieldName(prevField.FieldInfo.Name)
                         .Text);
                 }
 
                 // Check for an array array in the middle of a record that is not a fixed length
-                if (prevField.IsArray) {
-                    if (prevField.ArrayMinLength == int.MinValue) {
+                if (prevField.IsArray)
+                {
+                    if (prevField.ArrayMinLength == int.MinValue)
+                    {
                         throw new BadUsageException(Messages.Errors.MissingFieldArrayLenghtInNotLastField
                             .FieldName(prevField.FieldInfo.Name)
                             .Text);
                     }
 
-                    if (prevField.ArrayMinLength != prevField.ArrayMaxLength) {
+                    if (prevField.ArrayMinLength != prevField.ArrayMaxLength)
+                    {
                         throw new BadUsageException(Messages.Errors.SameMinMaxLengthForArrayNotLastField
                             .FieldName(prevField.FieldInfo.Name)
                             .Text);
@@ -335,10 +351,12 @@ namespace FileHelpers
         /// <param name="resFields">Other fields we have found</param>
         private static void CheckForOrderProblems(FieldBase currentField, List<FieldBase> resFields)
         {
-            if (currentField.FieldOrder.HasValue) {
+            if (currentField.FieldOrder.HasValue)
+            {
                 // If one field has order number set, all others must also have an order number
                 var fieldWithoutOrder = resFields.Find(x => x.FieldOrder.HasValue == false);
-                if (fieldWithoutOrder != null) {
+                if (fieldWithoutOrder != null)
+                {
                     throw new BadUsageException(Messages.Errors.PartialFieldOrder
                         .FieldName(fieldWithoutOrder.FieldInfo.Name)
                         .Text);
@@ -356,7 +374,8 @@ namespace FileHelpers
                         .Text);
                 }
             }
-            else {
+            else
+            {
                 // No other field should have order number set
                 var fieldWithOrder = resFields.Find(x => x.FieldOrder.HasValue);
                 if (fieldWithOrder != null)
@@ -386,7 +405,8 @@ namespace FileHelpers
         /// <returns>Index in field list</returns>
         public int GetFieldIndex(string fieldName)
         {
-            if (mMapFieldIndex == null) {
+            if (mMapFieldIndex == null)
+            {
                 // Initialize field index map
                 mMapFieldIndex = new Dictionary<string, int>(FieldCount, StringComparer.Ordinal);
                 for (int i = 0; i < FieldCount; i++)
@@ -398,7 +418,8 @@ namespace FileHelpers
             }
 
             int res;
-            if (!mMapFieldIndex.TryGetValue(fieldName, out res)) {
+            if (!mMapFieldIndex.TryGetValue(fieldName, out res))
+            {
                 throw new BadUsageException(Messages.Errors.FieldNotFound
                     .FieldName(fieldName)
                     .ClassName(RecordType.Name)
@@ -408,6 +429,18 @@ namespace FileHelpers
             return res;
         }
 
+        public void SetFieldOrder(string[] fieldNames)
+        {
+            List<FieldBase> newOrder = Fields.ToList();
+            newOrder = newOrder.OrderBy(f => OrderPosition(fieldNames,f)).ToList();
+            Fields = newOrder.ToArray();
+        }
+
+        private int OrderPosition(string[] fieldNames, FieldBase field)
+        {
+            int res = Array.IndexOf(fieldNames, field.FieldCaption ?? field.FieldName);
+            return res > -1 ? res : fieldNames.Length + Array.IndexOf(Fields, field);
+        }
         #endregion
 
         #region "  GetFieldInfo  "
@@ -419,7 +452,8 @@ namespace FileHelpers
         /// <returns>Field information</returns>
         public FieldInfo GetFieldInfo(string name)
         {
-            foreach (var field in Fields) {
+            foreach (var field in Fields)
+            {
                 if (field.FieldInfo.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return field.FieldInfo;
             }
@@ -463,7 +497,7 @@ namespace FileHelpers
             };
 
             res.Operations = Operations.Clone(res);
-            
+
             res.Fields = new FieldBase[Fields.Length];
             for (int i = 0; i < Fields.Length; i++)
                 res.Fields[i] = Fields[i].Clone();
