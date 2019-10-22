@@ -1,4 +1,4 @@
-$AssemblyVersion = "3.4.1.2"
+$AssemblyVersion = "3.4.1.3"
 $SemanticVersion = $AssemblyVersion + ""   #for stable version, set postfix to empty
 
 function Update-NuGetVersion ([string] $filename, [string] $versionNumber){

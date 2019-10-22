@@ -7,12 +7,16 @@ function Create-Folders() {
 
 function Compile-Solutions() {
     "Compiling " + $config
-
+    "OnlyLibs.sln"
+    "building 4.0"
     Compile-MSBuild-With-Deploy "..\FileHelpers.OnlyLibs.sln" "4.0" "Lib\net40"
+    "building 4.5"
     Compile-MSBuild-With-Deploy "..\FileHelpers.OnlyLibs.sln" "4.5" "Lib\net45"
-
+    
+    "FileHelpers.sln"
     Compile-MSBuild "..\FileHelpers.sln" "4.5"
-
+    
+    "FileHelpers.NetStandard.csproj"
     Compile-DotNet "..\FileHelpers\FileHelpers.NetStandard.csproj" "Lib\netstandard2.0"
 
     $delFiles = "..\" + $config + "\*.config"
