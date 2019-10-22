@@ -247,6 +247,7 @@ namespace FileHelpers
                 if (currentField == null)
                     continue;
 
+                currentField.CustomIndex = resFields.Count;
                 if (currentField.FieldInfo.IsDefined(typeof(CompilerGeneratedAttribute), false))
                     automaticFields++;
                 else
@@ -431,15 +432,65 @@ namespace FileHelpers
 
         public void SetFieldOrder(string[] fieldNames)
         {
-            List<FieldBase> newOrder = Fields.ToList();
-            newOrder = newOrder.OrderBy(f => OrderPosition(fieldNames,f)).ToList();
-            Fields = newOrder.ToArray();
+            CleanFieldNames(ref fieldNames);
+
+            List<FieldBase> lstFields = Fields.ToList();
+            lstFields = lstFields.OrderBy(f => OrderPosition(fieldNames, f)).ToList();
+            SetCustomFieldIndexes(fieldNames, lstFields);
         }
 
         private int OrderPosition(string[] fieldNames, FieldBase field)
         {
-            int res = Array.IndexOf(fieldNames, field.FieldCaption ?? field.FieldName);
+            int res = FindIndexofCaptionElseFieldName(fieldNames, field.FieldCaption);
+            if (res < 0)
+                res = FindIndexofCaptionElseFieldName(fieldNames, field.FieldName);
             return res > -1 ? res : fieldNames.Length + Array.IndexOf(Fields, field);
+        }
+
+        /// <summary>
+        /// Set Field.CustomIndex = Header Indexes, not found adds to back
+        /// </summary>
+        /// <param name="fieldNames"></param>
+        /// <param name="fields"></param>
+        private void SetCustomFieldIndexes(string[] fieldNames, List<FieldBase> fields)
+        {
+            List<FieldBase> newList = new List<FieldBase>();
+            for (int i = 0; i < fieldNames.Length; i++)
+            {
+                // find by column name
+                var field = fields.FirstOrDefault(f => (f.FieldCaption?.TrimLowerStrip(" ") ?? f.FieldName.TrimLowerStrip(" ")) == fieldNames[i])
+                            ?? fields.FirstOrDefault(f => f.FieldName?.TrimLowerStrip(" ") == fieldNames[i]);
+                
+                if (field != null)
+                {
+                    //set index to match field order provided
+                    field.CustomIndex = i;
+                    newList.Add(field.Clone());
+                    fields.Remove(field);
+                }
+            }
+
+            // add unmatched fields
+            var remaining = fields.Count();
+            for (int i = 0; i < remaining; i++)
+            {
+                var field = fields.FirstOrDefault();
+                field.CustomIndex = newList.Max(x => x.CustomIndex) + 1;
+                newList.Add(field.Clone());
+                fields.Remove(field);
+            }
+
+            Fields = newList.ToArray();
+        }
+
+        private int FindIndexofCaptionElseFieldName(string[] fieldNames, string field = "-field is null-")
+        {
+            return Array.IndexOf(fieldNames, field.TrimLowerStrip());
+        }
+
+        private void CleanFieldNames(ref string[] fields)
+        {
+            fields = fields.ToList().Select(f => f.TrimLowerStrip(" ")).ToList().ToArray();
         }
         #endregion
 

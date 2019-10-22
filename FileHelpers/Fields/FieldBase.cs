@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -104,6 +105,11 @@ namespace FileHelpers
         }
 
         /// <summary>
+        /// Index of field when importing
+        /// </summary>
+        public int CustomIndex { get; internal set;}
+
+        /// <summary>
         /// The next field along is optional,  optimise processing next records
         /// </summary>
         internal bool NextIsOptional
@@ -124,7 +130,7 @@ namespace FileHelpers
         /// <summary>
         /// Am I the last field in the array list
         /// </summary>
-        internal bool IsLast => ParentIndex == Parent.FieldCount - 1;
+        internal bool IsLast => CustomIndex == Parent.Fields.ToList().Max(f => f.CustomIndex);// .FieldCount - 1;
 
         /// <summary>
         /// Set from the FieldInNewLIneAtribute.  This field begins on a new
@@ -167,6 +173,12 @@ namespace FileHelpers
         /// Fieldname of the field we are storing
         /// </summary>
         internal string FieldName => FieldInfo.Name;
+
+        /// <summary>
+        /// Set the separator string
+        /// </summary>
+        /// <remarks>Also sets the discard count</remarks>
+        internal abstract string Separator { get;set;  }
 
         #endregion
 
@@ -978,6 +990,7 @@ namespace FileHelpers
             res.FieldCaption = FieldCaption;
             res.Parent = Parent;
             res.ParentIndex = ParentIndex;
+            res.CustomIndex = CustomIndex;
             return res;
         }
 

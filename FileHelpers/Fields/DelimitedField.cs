@@ -42,7 +42,7 @@ namespace FileHelpers
         /// Set the separator string
         /// </summary>
         /// <remarks>Also sets the discard count</remarks>
-        internal string Separator { get; set; }
+        internal override string Separator { get; set; }
 
         internal override int CharsToDiscard {
             get

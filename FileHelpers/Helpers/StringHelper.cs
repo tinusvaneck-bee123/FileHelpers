@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace FileHelpers.Helpers
@@ -296,6 +297,23 @@ namespace FileHelpers.Helpers
             sz = value.Length;
             // search
             return source.IndexOf(value, i, sz, comparisonType) == i;
+        }
+
+        /// <summary>
+        /// Trims, lowers, removes spaces and given strings
+        /// i.e. ("My Sampled_String","_") -> mysampledstring
+        /// </summary>
+        /// <param name="input">string to affect</param>
+        /// <param name="replacements">list of replacements</param>
+        /// <returns></returns>
+        public static string TrimLowerStrip(this string input, params string[] replacements)
+        {
+            input = (input ?? "").Trim().ToLower().Replace(" ", string.Empty);
+            replacements.ToList().ForEach(s =>
+            {
+                input = input.Replace(s, string.Empty);
+            });
+            return input;
         }
     }
 }

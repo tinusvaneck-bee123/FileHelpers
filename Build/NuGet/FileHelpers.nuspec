@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <id>FileHelpers</id>
+    <id>BEE123.FileHelpers</id>
     <version>3.4.1.1</version>
-    <title>FileHelpers</title>
+    <title>BEE123.FileHelpers</title>
     <authors>Tinus Van Eck</authors>
     <owners>Marcos Meli</owners>
-    <licenseUrl>http://www.filehelpers.net/#license</licenseUrl>
+    <!-- <licenseUrl>http://www.filehelpers.net/#license</licenseUrl> -->
     <projectUrl>http://www.filehelpers.net</projectUrl>
-    <iconUrl>http://www.filehelpers.net/images/filehelpers_box_small.png</iconUrl>
+    <!-- <iconUrl>http://www.filehelpers.net/images/filehelpers_box_small.png</iconUrl> -->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Forked Open Source library for automatic formatted file read/write operations www.filehelpers.net</description>
     <summary>Open Source library for automatic formatted file read/write operations</summary>
@@ -22,13 +22,13 @@
     <dependencies>
       <group targetFramework="net40" />
       <group targetFramework="net45" />
-      <group targetFramework="netstandard2.0">
-        <dependency id="NETStandard.Library" version="2.0.0" />
-      </group>
+      <!-- <group targetFramework="netstandard2.0"> -->
+        <!-- <dependency id="NETStandard.Library" version="2.0.0" /> -->
+      <!-- </group> -->
     </dependencies>
   </metadata>
   <files>
-    <file src="..\..\Release\Lib\netstandard2.0\netstandard2.0\FileHelpers.dll" target="lib\netstandard2.0\FileHelpers.dll" />
+    <!-- <file src="..\..\Release\Lib\netstandard2.0\netstandard2.0\FileHelpers.dll" target="lib\netstandard2.0\FileHelpers.dll" /> -->
     <file src="..\..\Release\Lib\net40\FileHelpers.dll" target="lib\net40\FileHelpers.dll" />
     <file src="..\..\Release\Lib\net40\FileHelpers.xml" target="lib\net40\FileHelpers.xml" />
     <file src="..\..\Release\Lib\net45\FileHelpers.dll" target="lib\net45\FileHelpers.dll" />

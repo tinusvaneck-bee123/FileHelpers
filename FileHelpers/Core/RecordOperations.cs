@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Data;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using FileHelpers.Helpers;
@@ -43,15 +44,19 @@ namespace FileHelpers
             for (int i = 0; i < mRecordInfo.FieldCount; i++)
                 values[i] = mRecordInfo.Fields[i].ExtractFieldValue(line);
 
-            try {
+            try
+            {
                 // Assign all values via dynamic method that creates an object and assign values
                 return CreateHandler(values);
             }
-            catch (InvalidCastException ex) {
+            catch (InvalidCastException ex)
+            {
                 // Occurs when a custom converter returns an invalid value for the field.
-                for (int i = 0; i < mRecordInfo.FieldCount; i++) {
+                for (int i = 0; i < mRecordInfo.FieldCount; i++)
+                {
                     if (values[i] != null &&
-                        !mRecordInfo.Fields[i].FieldTypeInternal.IsInstanceOfType(values[i])) {
+                        !mRecordInfo.Fields[i].FieldTypeInternal.IsInstanceOfType(values[i]))
+                    {
                         throw new ConvertException(null,
                             mRecordInfo.Fields[i].FieldTypeInternal,
                             mRecordInfo.Fields[i].FieldInfo.Name,
@@ -82,19 +87,38 @@ namespace FileHelpers
             if (MustIgnoreLine(line.mLineStr))
                 return false;
 
-            for (int i = 0; i < mRecordInfo.FieldCount; i++)
-                values[i] = mRecordInfo.Fields[i].ExtractFieldValue(line);
+            int maxCustomIndex = mRecordInfo.Fields.ToList().Max(x => x.CustomIndex) + 1;
+            int skipCount = 0;
+            for (int i = 0; i < maxCustomIndex; i++)
+            {
+                var setPos = i - skipCount;
+                var field = mRecordInfo.Fields.FirstOrDefault(f => f.CustomIndex == i) ?? mRecordInfo.Fields[i - skipCount];
+                //if (line.IsEOL() && (field is DelimitedField))
+                //    values[setPos] = field.NullValue;
+                //else
+                    values[setPos] = field.ExtractFieldValue(line);
+                if (!mRecordInfo.Fields.ToList().Any(f => f.CustomIndex == i))
+                {
+                    values[setPos] = field.NullValue;
+                    skipCount++;// discard extracted line value and set next iteration to values[i-1]
+                }
 
-            try {
+            }
+
+            try
+            {
                 // Assign all values via dynamic method that
                 AssignHandler(record, values);
                 return true;
             }
-            catch (InvalidCastException ex) {
+            catch (InvalidCastException ex)
+            {
                 // Occurs when a custom converter returns an invalid value for the field.
-                for (int i = 0; i < mRecordInfo.FieldCount; i++) {
+                for (int i = 0; i < mRecordInfo.FieldCount; i++)
+                {
                     if (values[i] != null &&
-                        !mRecordInfo.Fields[i].FieldTypeInternal.IsInstanceOfType(values[i])) {
+                        !mRecordInfo.Fields[i].FieldTypeInternal.IsInstanceOfType(values[i]))
+                    {
                         throw new ConvertException(null,
                             mRecordInfo.Fields[i].FieldTypeInternal,
                             mRecordInfo.Fields[i].FieldInfo.Name,
@@ -120,20 +144,24 @@ namespace FileHelpers
         /// <returns>True if line is skipped</returns>
         private bool MustIgnoreLine(string line)
         {
-            if (mRecordInfo.IgnoreEmptyLines) {
+            if (mRecordInfo.IgnoreEmptyLines)
+            {
                 if ((mRecordInfo.IgnoreEmptySpaces && string.IsNullOrWhiteSpace(line)) ||
                     line.Length == 0)
                     return true;
             }
 
-            if (!string.IsNullOrEmpty(mRecordInfo.CommentMarker)) {
+            if (!string.IsNullOrEmpty(mRecordInfo.CommentMarker))
+            {
                 if ((mRecordInfo.CommentAnyPlace && StringHelper.StartsWithIgnoringWhiteSpaces(line, mRecordInfo.CommentMarker, StringComparison.Ordinal)) ||
                     line.StartsWith(mRecordInfo.CommentMarker, StringComparison.Ordinal))
                     return true;
             }
 
-            if (mRecordInfo.RecordCondition != RecordCondition.None) {
-                switch (mRecordInfo.RecordCondition) {
+            if (mRecordInfo.RecordCondition != RecordCondition.None)
+            {
+                switch (mRecordInfo.RecordCondition)
+                {
                     case RecordCondition.ExcludeIfBegins:
                         return ConditionHelper.BeginsWith(line, mRecordInfo.RecordConditionSelector);
                     case RecordCondition.IncludeIfBegins:
@@ -268,13 +296,16 @@ namespace FileHelpers
 
             res.MinimumCapacity = records.Count;
 
-            if (maxRecords == -1) {
+            if (maxRecords == -1)
+            {
                 foreach (var r in records)
                     res.Rows.Add(RecordToValues(r));
             }
-            else {
+            else
+            {
                 int i = 0;
-                foreach (var r in records) {
+                foreach (var r in records)
+                {
                     if (i == maxRecords)
                         break;
 
@@ -295,9 +326,11 @@ namespace FileHelpers
         {
             var res = new DataTable();
 
-            foreach (var f in mRecordInfo.Fields) {
+            foreach (var f in mRecordInfo.Fields)
+            {
                 DataColumn column1;
-                if (f.IsNullableType) {
+                if (f.IsNullableType)
+                {
                     column1 = res.Columns.Add(f.FieldInfo.Name, Nullable.GetUnderlyingType(f.FieldInfo.FieldType));
                     column1.AllowDBNull = true;
                 }
@@ -340,7 +373,8 @@ namespace FileHelpers
         {
             get
             {
-                if (mCreateHandler == null) {
+                if (mCreateHandler == null)
+                {
                     mCreateHandler = ReflectionHelper.CreateAndAssignValuesMethod(mRecordInfo.RecordType,
                         GetFieldInfoArray());
                 }

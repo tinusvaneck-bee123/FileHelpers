@@ -27,6 +27,12 @@ namespace FileHelpers
         /// </summary>
         internal FixedMode FixedMode { get; set; }
 
+        /// <summary>
+        /// Set the separator string
+        /// </summary>
+        /// <remarks>Also sets the discard count</remarks>
+        internal override string Separator { get; set; }
+
         #endregion
 
         #region "  Constructor  "
@@ -34,7 +40,7 @@ namespace FileHelpers
         /// <summary>
         /// Simple fixed length field constructor
         /// </summary>
-        private FixedLengthField() {}
+        private FixedLengthField() { }
 
         /// <summary>
         /// Create a fixed length field from field information
@@ -43,7 +49,7 @@ namespace FileHelpers
         /// <param name="length">Length of this field</param>
         /// <param name="align">Alignment, left or right</param>
         /// <param name="defaultCultureName">Default culture name used for each properties if no converter is specified otherwise. If null, the default decimal separator (".") will be used.</param>
-        internal FixedLengthField(FieldInfo fi, int length, FieldAlignAttribute align, string defaultCultureName=null)
+        internal FixedLengthField(FieldInfo fi, int length, FieldAlignAttribute align, string defaultCultureName = null)
             : base(fi, defaultCultureName)
         {
             FixedMode = FixedMode.ExactLength;
@@ -52,7 +58,8 @@ namespace FileHelpers
 
             if (align != null)
                 Align = align;
-            else {
+            else
+            {
                 if (TypeHelper.IsNumericType(fi.FieldType))
                     Align = new FieldAlignAttribute(AlignMode.Right, ' ');
             }
@@ -69,10 +76,12 @@ namespace FileHelpers
         /// <returns>Information extracted from record</returns>
         internal override ExtractedInfo ExtractFieldString(LineInfo line)
         {
-            if (line.CurrentLength == 0) {
+            if (line.CurrentLength == 0)
+            {
                 if (IsOptional)
                     return ExtractedInfo.Empty;
-                else {
+                else
+                {
                     throw new BadUsageException("End Of Line found processing the field: " + FieldInfo.Name +
                                                 " at line " + line.mReader.LineNumber.ToString()
                                                 +
@@ -82,11 +91,13 @@ namespace FileHelpers
 
             //ExtractedInfo res;
 
-            if (line.CurrentLength < FieldLength) {
+            if (line.CurrentLength < FieldLength)
+            {
                 if (FixedMode == FixedMode.AllowLessChars ||
                     FixedMode == FixedMode.AllowVariableLength)
                     return new ExtractedInfo(line);
-                else {
+                else
+                {
                     throw new BadUsageException("The string '" + line.CurrentString + "' (length " +
                                                 line.CurrentLength.ToString() + ") at line "
                                                 + line.mReader.LineNumber.ToString() +
@@ -99,7 +110,8 @@ namespace FileHelpers
                      IsArray == false &&
                      IsLast &&
                      FixedMode != FixedMode.AllowMoreChars &&
-                     FixedMode != FixedMode.AllowVariableLength) {
+                     FixedMode != FixedMode.AllowVariableLength)
+            {
                 throw new BadUsageException("The string '" + line.CurrentString + "' (length " +
                                             line.CurrentLength.ToString() + ") at line "
                                             + line.mReader.LineNumber.ToString() +
@@ -125,22 +137,25 @@ namespace FileHelpers
             if (field.Length > FieldLength)
                 field = field.Substring(0, FieldLength);
 
-            if (Align.Align == AlignMode.Left) {
+            if (Align.Align == AlignMode.Left)
+            {
                 sb.Append(field);
                 sb.Append(Align.AlignChar, FieldLength - field.Length);
             }
-            else if (Align.Align == AlignMode.Right) {
+            else if (Align.Align == AlignMode.Right)
+            {
                 sb.Append(Align.AlignChar, FieldLength - field.Length);
                 sb.Append(field);
             }
-            else {
-                int middle = (FieldLength - field.Length)/2;
+            else
+            {
+                int middle = (FieldLength - field.Length) / 2;
 
                 sb.Append(Align.AlignChar, middle);
                 sb.Append(field);
                 sb.Append(Align.AlignChar, FieldLength - field.Length - middle);
-//				if (middle > 0)
-//					res = res.PadLeft(mFieldLength - middle, mAlign.AlignChar).PadRight(mFieldLength, mAlign.AlignChar);
+                //				if (middle > 0)
+                //					res = res.PadLeft(mFieldLength - middle, mAlign.AlignChar).PadRight(mFieldLength, mAlign.AlignChar);
             }
         }
 
@@ -152,7 +167,8 @@ namespace FileHelpers
         /// the base settings</returns>
         protected override FieldBase CreateClone()
         {
-            var res = new FixedLengthField {
+            var res = new FixedLengthField
+            {
                 Align = Align,
                 FieldLength = FieldLength,
                 FixedMode = FixedMode

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using FileHelpers.Events;
 using FileHelpers.Helpers;
@@ -228,7 +229,6 @@ namespace FileHelpers
                         line.ReLoad(currentLine);
 
                         var skip = false;
-
                         var record = (T)RecordInfo.Operations.CreateRecordHandler();
 
                         if (MustNotifyProgress) // Avoid object creation
@@ -250,6 +250,13 @@ namespace FileHelpers
 
                         if (skip == false)
                         {
+                            // add seperators * columns shifted
+                            var maxIndex = RecordInfo.Fields.ToList().Max(f => f.CustomIndex);
+                            for (int i = RecordInfo.Fields.Count(); i < maxIndex + 1; i++)
+                            {
+                                line.mLineStr += RecordInfo.Fields.FirstOrDefault()?.Separator ?? ",";
+                            }
+
                             if (RecordInfo.Operations.StringToRecord(record, line, values))
                             {
 

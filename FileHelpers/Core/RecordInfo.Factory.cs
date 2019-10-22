@@ -52,6 +52,7 @@ namespace FileHelpers
             for (int i = 0; i < Fields.Length; i++)
             {
                 Fields[i].ParentIndex = i;
+                Fields[i].CustomIndex = i;
             }
         }
     }
