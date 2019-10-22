@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BEE123.FileHelpers</id>
-    <version>3.4.1.1</version>
+    <version>3.4.1.2</version>
     <title>BEE123.FileHelpers</title>
     <authors>Tinus Van Eck</authors>
     <owners>Marcos Meli</owners>
@@ -11,7 +11,7 @@
     <!-- <iconUrl>http://www.filehelpers.net/images/filehelpers_box_small.png</iconUrl> -->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Forked Open Source library for automatic formatted file read/write operations www.filehelpers.net</description>
-    <summary>Open Source library for automatic formatted file read/write operations</summary>
+    <summary>Open Source library for automatic formatted file read/write operations with support for using file column order.</summary>
     <releaseNotes>www.filehelpers.net/changelog</releaseNotes>
     <copyright>Marcos Meli - Devoo</copyright>
     <tags>FileHelpers, Data, Flat File, CSV, FixedLength, Fixed, Delimited, Import, Export, ETL, FileHelper, .NET, .NET Core</tags>
@@ -23,7 +23,7 @@
       <group targetFramework="net40" />
       <group targetFramework="net45" />
       <!-- <group targetFramework="netstandard2.0"> -->
-        <!-- <dependency id="NETStandard.Library" version="2.0.0" /> -->
+      <!-- <dependency id="NETStandard.Library" version="2.0.0" /> -->
       <!-- </group> -->
     </dependencies>
   </metadata>
