@@ -475,7 +475,7 @@ namespace FileHelpers
             for (int i = 0; i < remaining; i++)
             {
                 var field = fields.FirstOrDefault();
-                field.CustomIndex = newList.Max(x => x.CustomIndex) + 1;
+                field.CustomIndex = newList.Select(x => x.CustomIndex).DefaultIfEmpty(-1).Max() + 1;
                 newList.Add(field.Clone());
                 fields.Remove(field);
             }
@@ -490,7 +490,7 @@ namespace FileHelpers
 
         private void CleanFieldNames(ref string[] fields)
         {
-            fields = fields.ToList().Select(f => f.TrimLowerStrip(" ")).ToList().ToArray();
+            fields = fields.ToList().Select(f => f.TrimLowerStrip(" ","\"")).ToList().ToArray();
         }
         #endregion
 
