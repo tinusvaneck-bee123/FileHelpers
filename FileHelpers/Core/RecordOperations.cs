@@ -93,14 +93,21 @@ namespace FileHelpers
             {
                 var setPos = i - skipCount;
                 var field = mRecordInfo.Fields.FirstOrDefault(f => f.CustomIndex == i) ?? mRecordInfo.Fields[i - skipCount];
-                //if (line.IsEOL() && (field is DelimitedField))
-                //    values[setPos] = field.NullValue;
-                //else
-                    values[setPos] = field.ExtractFieldValue(line);
-                if (!mRecordInfo.Fields.ToList().Any(f => f.CustomIndex == i))
+                
+                bool fieldNotInFile = !mRecordInfo.Fields.ToList().Any(f => f.CustomIndex == i);
+
+                if (fieldNotInFile)
                 {
+                    var tmpField = new DelimitedField(typeof(StringField).GetField("field"), mRecordInfo.Fields[0].Separator);
+                    var tmpVal = tmpField.ExtractFieldValue(line);
+                    field.ExtractFieldString(line);
+
                     values[setPos] = field.NullValue;
                     skipCount++;// discard extracted line value and set next iteration to values[i-1]
+                }
+                else
+                {
+                    values[setPos] = field.ExtractFieldValue(line);
                 }
 
             }
@@ -438,5 +445,10 @@ namespace FileHelpers
             };
             return res;
         }
+    }
+
+    internal class StringField
+    {
+        public string field;
     }
 }

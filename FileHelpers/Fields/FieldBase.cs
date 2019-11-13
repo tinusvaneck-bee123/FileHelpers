@@ -130,7 +130,7 @@ namespace FileHelpers
         /// <summary>
         /// Am I the last field in the array list
         /// </summary>
-        internal bool IsLast => CustomIndex == Parent.Fields.ToList().Max(f => f.CustomIndex);// .FieldCount - 1;
+        internal bool IsLast => CustomIndex == (Parent?.Fields?.ToList()?.Max(f => f.CustomIndex) ?? 999);
 
         /// <summary>
         /// Set from the FieldInNewLIneAtribute.  This field begins on a new

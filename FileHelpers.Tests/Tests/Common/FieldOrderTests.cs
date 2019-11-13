@@ -2,18 +2,34 @@ using System;
 using NUnit.Framework;
 using NFluent;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace FileHelpers.Tests.CommonTests
 {
     [TestFixture]
     public class FieldOrderTests
     {
+        string data_standard = "Field1,field2,Field3,Field4,Field5" + Environment.NewLine +
+                          "1,2,Three,4,31012019" + Environment.NewLine +
+                          "11,22,ThreeThree,44,28022019" + Environment.NewLine;
+        string[] fields_standard = new string[] { "Field1", "field2", "Field3", "Field4", "Field5" };
+
+        string data_WithExtraFields = "Field1,field2,Field3,Field4,Field5,Field6" + Environment.NewLine +
+                          "1,2,Three,4,31012019,a" + Environment.NewLine +
+                          "11,22,ThreeThree,44,28022019,a" + Environment.NewLine;
+
+        string data_WithExtraFieldsInMiddle = "Field1,field6,field2,Field3,Field4,Field5" + Environment.NewLine +
+                          "1,a,2,Three,4,31012019" + Environment.NewLine +
+                          "11,b,22,ThreeThree,44,28022019" + Environment.NewLine;
+        string[] fields_withextrainmiddle = new string[] { "Field1", "field6", "field2", "Field3", "Field4", "Field5" };
+
         [Test]
         public void SimpleOrder()
         {
             var engine = new FileHelperEngine<FieldOrderType>();
 
-            Assert.AreEqual(5, engine.Options.FieldCount);
+            Assert.AreEqual(6, engine.Options.FieldCount);
             Assert.AreEqual("Field1", engine.Options.FieldsNames[0]);
             Assert.AreEqual("Field2", engine.Options.FieldsNames[1]);
             Assert.AreEqual("Field3", engine.Options.FieldsNames[2]);
@@ -49,14 +65,28 @@ namespace FileHelpers.Tests.CommonTests
             Assert.AreEqual("Field3", engine.Options.FieldsNames[4]);
         }
 
-        [DelimitedRecord("\t")]
+        [IgnoreFirst]
+        [DelimitedRecord(",")]
+        [IgnoreInheritedClass]
         public class FieldOrderType
         {
+            [FieldCaption("Field1")]
             public int Field1;
+
+            [FieldCaption("Field2")]
             public int Field2;
+
+            [FieldCaption("Field3")]
             public string Field3;
+
+            [FieldCaption("Field4")]
             public int Field4;
+
+            [FieldCaption("Field5")]
             public DateTime Field5;
+
+            [FieldQuoted('"', QuoteMode.OptionalForBoth), FieldOptional]
+            public string[] Extras;
         }
 
 
@@ -370,13 +400,13 @@ namespace FileHelpers.Tests.CommonTests
         {
             // arrange
             var engine = new FileHelperEngine<FieldOrderType>();
-            List<string> newOrder = new List<string>() { "Field5", "Field4", "Field3"};
-            
+            List<string> newOrder = new List<string>() { "Field5", "Field4", "Field3" };
+
             // act
             engine.SetFieldOrder(newOrder.ToArray());
 
             // assert
-            Assert.AreEqual(5, engine.Options.FieldCount);
+            Assert.AreEqual(6, engine.Options.FieldCount);
             Assert.AreEqual("Field5", engine.Options.FieldsNames[0]);
             Assert.AreEqual("Field4", engine.Options.FieldsNames[1]);
             Assert.AreEqual("Field3", engine.Options.FieldsNames[2]);
@@ -395,7 +425,7 @@ namespace FileHelpers.Tests.CommonTests
             engine.SetFieldOrder(newOrder.ToArray());
 
             // assert
-            Assert.AreEqual(5, engine.Options.FieldCount);
+            Assert.AreEqual(6, engine.Options.FieldCount);
             Assert.AreEqual("Field5", engine.Options.FieldsNames[0]);
             Assert.AreEqual("Field4", engine.Options.FieldsNames[1]);
             Assert.AreEqual("Field3", engine.Options.FieldsNames[2]);
@@ -408,19 +438,126 @@ namespace FileHelpers.Tests.CommonTests
         {
             // arrange
             var engine = new DelimitedFileEngine<FieldOrderType>();
-            List<string> newOrder = new List<string>() { "Field5", "Field4", "Field3"};
+            List<string> newOrder = new List<string>() { "Field5", "Field4", "Field3" };
 
             // act
             //engine.SetFieldOrder(newOrder);
             engine.SetFieldOrder(newOrder.ToArray());
 
             // assert
-            Assert.AreEqual(5, engine.Options.FieldCount);
+            Assert.AreEqual(6, engine.Options.FieldCount);
             Assert.AreEqual("Field5", engine.Options.FieldsNames[0]);
             Assert.AreEqual("Field4", engine.Options.FieldsNames[1]);
             Assert.AreEqual("Field3", engine.Options.FieldsNames[2]);
             Assert.AreEqual("Field1", engine.Options.FieldsNames[3]);
             Assert.AreEqual("Field2", engine.Options.FieldsNames[4]);
+        }
+
+
+
+        [Test]
+        public void StandardImport_WithoutColumnOrderingFromHeader()
+        {
+            // arrange
+            var engine = new DelimitedFileEngine<FieldOrderType>();
+            engine.Options.IgnoreEmptyLines = true;
+            engine.ErrorMode = ErrorMode.SaveAndContinue;
+
+            // act
+            var res = engine.ReadStream(new StringReader(data_standard), Int32.MaxValue).ToList();
+
+            // assert
+            Assert.IsFalse(engine.ErrorManager.HasErrors);
+            Assert.IsTrue(res.Count == 2);
+            Validate_Data_Standard(res);
+        }
+
+        [Test]
+        public void StandardImport()
+        {
+            // arrange
+            var engine = new DelimitedFileEngine<FieldOrderType>();
+            engine.Options.IgnoreEmptyLines = true;
+            engine.ErrorMode = ErrorMode.SaveAndContinue;
+
+            // act
+            var res = engine.ReadStream(new StringReader(data_standard), Int32.MaxValue).ToList();
+
+            // assert
+            Assert.IsFalse(engine.ErrorManager.HasErrors);
+            Assert.IsTrue(res.Count == 2);
+            Validate_Data_Standard(res);
+        }
+
+        [Test]
+        public void StandardImport_WithColumnOrdering()
+        {
+            // arrange
+            var engine = new DelimitedFileEngine<FieldOrderType>();
+            engine.Options.IgnoreEmptyLines = true;
+            engine.ErrorMode = ErrorMode.SaveAndContinue;
+
+            engine.SetFieldOrder(fields_standard);
+
+            // act
+            var res = engine.ReadStream(new StringReader(data_standard), Int32.MaxValue).ToList();
+
+            // assert
+            Assert.IsFalse(engine.ErrorManager.HasErrors);
+            Assert.IsTrue(res.Count == 2);
+            Validate_Data_Standard(res);
+
+        }
+
+        [Test]
+        public void StandardImport_WithExtraColumnsAndColumnOrdering()
+        {
+            // arrange
+            var engine = new DelimitedFileEngine<FieldOrderType>();
+            engine.Options.IgnoreEmptyLines = true;
+            engine.ErrorMode = ErrorMode.SaveAndContinue;
+            engine.SetFieldOrder(fields_standard);
+
+            // act
+            var res = engine.ReadStream(new StringReader(data_WithExtraFields), Int32.MaxValue).ToList();
+
+            // assert
+            Assert.IsFalse(engine.ErrorManager.HasErrors);
+            Assert.IsTrue(res.Count == 2);
+            Validate_Data_Standard(res);
+        }
+
+        [Test]
+        public void StandardImport_WithExtraColumnsInMiddleAndColumnOrdering()
+        {
+            // arrange
+            var engine = new DelimitedFileEngine<FieldOrderType>();
+            engine.Options.IgnoreEmptyLines = true;
+            engine.ErrorMode = ErrorMode.SaveAndContinue;
+            engine.SetFieldOrder(fields_withextrainmiddle);
+
+            // act
+            var res = engine.ReadStream(new StringReader(data_WithExtraFieldsInMiddle), Int32.MaxValue).ToList();
+
+            // assert
+            Assert.IsFalse(engine.ErrorManager.HasErrors);
+            Assert.IsTrue(res.Count == 2);
+            Validate_Data_Standard(res);
+
+        }
+
+        private void Validate_Data_Standard(List<FieldOrderType> res)
+        {
+            Assert.AreEqual(1, res[0].Field1);
+            Assert.AreEqual(2, res[0].Field2);
+            Assert.AreEqual("Three", res[0].Field3);
+            Assert.AreEqual(4, res[0].Field4);
+            Assert.AreEqual(new DateTime(2019, 01, 31), res[0].Field5);
+            Assert.AreEqual(11, res[1].Field1);
+            Assert.AreEqual(22, res[1].Field2);
+            Assert.AreEqual("ThreeThree", res[1].Field3);
+            Assert.AreEqual(44, res[1].Field4);
+            Assert.AreEqual(new DateTime(2019, 02, 28), res[1].Field5);
         }
 
     }
